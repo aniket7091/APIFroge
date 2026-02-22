@@ -1,4 +1,4 @@
-# APIForge 🔥
+# APIForge 
 
 **A full-stack API testing tool similar to Postman**, built with **Flutter** (Web + Desktop) and a **Node.js + Express + MongoDB** backend.
 
@@ -8,14 +8,14 @@
 
 | Feature | Details |
 |---------|---------|
-| 🚀 **HTTP Request Builder** | GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS |
-| 📦 **Collections** | Create, edit, delete collections with color labels |
-| 📜 **History** | Auto-logged request history with pagination |
-| 🔐 **JWT Auth** | Signup/Login + Bearer & Basic auth support |
-| 🌍 **Environment Variables** | `{{VAR_NAME}}` interpolation in URLs |
-| 💡 **Code Snippets** | Generate `curl` & JS `fetch` code |
-| 🎨 **Dark / Light Mode** | Persistent, togglable from the sidebar |
-| 🖥️ **Responsive Layout** | Side-by-side panels on wide screens, stacked on narrow |
+|  **HTTP Request Builder** | GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS |
+|  **Collections** | Create, edit, delete collections with color labels |
+|  **History** | Auto-logged request history with pagination |
+|  **JWT Auth** | Signup/Login + Bearer & Basic auth support |
+|  **Environment Variables** | `{{VAR_NAME}}` interpolation in URLs |
+|  **Code Snippets** | Generate `curl` & JS `fetch` code |
+|  **Dark / Light Mode** | Persistent, togglable from the sidebar |
+|  **Responsive Layout** | Side-by-side panels on wide screens, stacked on narrow |
 
 ---
 
@@ -57,7 +57,7 @@ APIForge/
 
 ---
 
-## ⚙️ Backend Setup
+##  Backend Setup
 
 ```bash
 # 1. Navigate to backend
@@ -106,7 +106,7 @@ The API will be available at **http://localhost:5000/api**
 
 ---
 
-## 🎨 Flutter Frontend Setup
+##  Flutter Frontend Setup
 
 ```bash
 # 1. Navigate to Flutter project
@@ -133,7 +133,7 @@ flutter build web
 
 ---
 
-## 🌍 Using Environment Variables
+##  Using Environment Variables
 
 1. Open the app → Sidebar → **Environment & Settings**
 2. Add a variable: e.g., `BASE_URL` = `https://api.example.com`
@@ -141,7 +141,7 @@ flutter build web
 
 ---
 
-## 🚢 Deployment
+##  Deployment
 
 ### Backend — Deploy to Railway / Render / Heroku
 
@@ -164,7 +164,7 @@ Update `_baseUrl` in `lib/services/api_client.dart` to your production backend U
 
 ---
 
-## 🔒 Security Notes
+##  Security Notes
 
 - All sensitive credentials are stored in `.env` (never committed)
 - Passwords hashed with bcrypt (12 rounds)
@@ -174,7 +174,7 @@ Update `_baseUrl` in `lib/services/api_client.dart` to your production backend U
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
