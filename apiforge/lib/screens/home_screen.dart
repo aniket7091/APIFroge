@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'dart:convert';
 import '../theme/app_theme.dart';
@@ -22,7 +24,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   // Request state
   String _method = 'GET';
-  final _urlCtrl = TextEditingController(text: 'https://jsonplaceholder.typicode.com/todos/1');
+  final _urlCtrl = TextEditingController(
+      text: 'https://jsonplaceholder.typicode.com/todos/1');
   List<_KVEntry> _params = [_KVEntry()];
   List<_KVEntry> _headers = [_KVEntry()];
   AuthConfig _auth = const AuthConfig();
@@ -32,12 +35,21 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController _requestTabCtrl;
   late TabController _responseTabCtrl;
 
-  static const _methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
+  static const _methods = [
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'HEAD',
+    'OPTIONS'
+  ];
 
   @override
   void initState() {
     super.initState();
-    _requestTabCtrl = TabController(length: 5, vsync: this); // Params|Headers|Body|Auth|Snippets
+    _requestTabCtrl = TabController(
+        length: 5, vsync: this); // Params|Headers|Body|Auth|Snippets
     _responseTabCtrl = TabController(length: 1, vsync: this);
     // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -101,28 +113,41 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Request Name')),
+            TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Request Name')),
             const SizedBox(height: 14),
             if (collections.isNotEmpty)
               DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Collection (optional)'),
-                items: collections.map((c) => DropdownMenuItem(value: c.id, child: Text(c.name))).toList(),
+                decoration:
+                    const InputDecoration(labelText: 'Collection (optional)'),
+                items: collections
+                    .map((c) =>
+                        DropdownMenuItem(value: c.id, child: Text(c.name)))
+                    .toList(),
                 onChanged: (v) => selectedCollectionId = v,
               ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           ElevatedButton(
             onPressed: () async {
               final svc = context.read<RequestService>();
               dynamic body;
               if (_bodyType == 'json' && _bodyCtrl.text.isNotEmpty) {
-                try { body = json.decode(_bodyCtrl.text); } catch (_) { body = _bodyCtrl.text; }
+                try {
+                  body = json.decode(_bodyCtrl.text);
+                } catch (_) {
+                  body = _bodyCtrl.text;
+                }
               }
               await svc.saveRequest(RequestModel(
                 id: '',
-                name: nameCtrl.text.trim().isEmpty ? '$_method ${_urlCtrl.text}' : nameCtrl.text.trim(),
+                name: nameCtrl.text.trim().isEmpty
+                    ? '$_method ${_urlCtrl.text}'
+                    : nameCtrl.text.trim(),
                 method: _method,
                 url: _urlCtrl.text.trim(),
                 headers: _kvToMap(_headers),
@@ -135,7 +160,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               if (mounted) {
                 Navigator.pop(ctx);
                 if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('✅ Request saved!')));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('✅ Request saved!')));
                 }
               }
             },
@@ -177,21 +203,39 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             builder: (_, ctrl) => Container(
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.surface,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(20)),
               ),
               child: Column(
                 children: [
-                  Container(height: 4, width: 40, margin: const EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(color: Colors.grey.withOpacity(0.4), borderRadius: BorderRadius.circular(2))),
-                  const Text('Code Snippet', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  Container(
+                      height: 4,
+                      width: 40,
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.4),
+                          borderRadius: BorderRadius.circular(2))),
+                  const Text('Code Snippet',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 8,
                     children: [
-                      ChoiceChip(label: const Text('curl'), selected: snippetType == 'curl',
-                          onSelected: (_) { setSt(() => snippetType = 'curl'); loadSnippet(setSt); }),
-                      ChoiceChip(label: const Text('JS fetch'), selected: snippetType == 'fetch',
-                          onSelected: (_) { setSt(() => snippetType = 'fetch'); loadSnippet(setSt); }),
+                      ChoiceChip(
+                          label: const Text('curl'),
+                          selected: snippetType == 'curl',
+                          onSelected: (_) {
+                            setSt(() => snippetType = 'curl');
+                            loadSnippet(setSt);
+                          }),
+                      ChoiceChip(
+                          label: const Text('JS fetch'),
+                          selected: snippetType == 'fetch',
+                          onSelected: (_) {
+                            setSt(() => snippetType = 'fetch');
+                            loadSnippet(setSt);
+                          }),
                     ],
                   ),
                   Expanded(
@@ -208,15 +252,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             SingleChildScrollView(
                               controller: ctrl,
                               child: SelectableText(snippetText,
-                                  style: const TextStyle(fontFamily: 'monospace', color: Colors.greenAccent, fontSize: 13, height: 1.6)),
+                                  style: const TextStyle(
+                                      fontFamily: 'monospace',
+                                      color: Colors.greenAccent,
+                                      fontSize: 13,
+                                      height: 1.6)),
                             ),
                             Positioned(
-                              top: 0, right: 0,
+                              top: 0,
+                              right: 0,
                               child: IconButton(
-                                icon: const Icon(Icons.copy, color: Colors.white70, size: 18),
+                                icon: const Icon(Icons.copy,
+                                    color: Colors.white70, size: 18),
                                 onPressed: () {
-                                  Clipboard.setData(ClipboardData(text: snippetText));
-                                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied!'), duration: Duration(seconds: 1)));
+                                  Clipboard.setData(
+                                      ClipboardData(text: snippetText));
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text('Copied!'),
+                                          duration: Duration(seconds: 1)));
                                 },
                               ),
                             ),
@@ -243,21 +297,28 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.api_rounded, color: cs.primary, size: 22),
-            const SizedBox(width: 8),
-            const Text('APIForge', style: TextStyle(fontWeight: FontWeight.bold)),
+            ImageIcon(
+              const AssetImage("assets/logo/logoApp_rm.png"),
+              size: 60,
+              color: Colors.orange[700],
+            ),
+            const Text('APIForge',
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.save_outlined),
+            icon: const Icon(CupertinoIcons.doc_fill),
             tooltip: 'Save Request',
             onPressed: _saveRequest,
           ),
-          IconButton(
-            icon: const Icon(Icons.code_outlined),
-            tooltip: 'Code Snippets',
-            onPressed: _showSnippets,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 17),
+            child: IconButton(
+              icon: const Icon(CupertinoIcons.arrow_right_arrow_left),
+              tooltip: 'Code Snippets',
+              onPressed: _showSnippets,
+            ),
           ),
         ],
       ),
@@ -273,18 +334,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 // Method dropdown
                 Container(
                   decoration: BoxDecoration(
-                    color: AppTheme.methodColor(_method).withValues(alpha: 0.12),
+                    color:
+                        AppTheme.methodColor(_method).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppTheme.methodColor(_method).withValues(alpha: 0.3)),
+                    border: Border.all(
+                        color: AppTheme.methodColor(_method)
+                            .withValues(alpha: 0.3)),
                   ),
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
                       value: _method,
-                      items: _methods.map((m) => DropdownMenuItem(
-                        value: m,
-                        child: Text(m, style: TextStyle(color: AppTheme.methodColor(m), fontWeight: FontWeight.bold, fontSize: 13)),
-                      )).toList(),
+                      items: _methods
+                          .map((m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(m,
+                                    style: TextStyle(
+                                        color: AppTheme.methodColor(m),
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13)),
+                              ))
+                          .toList(),
                       onChanged: (v) => setState(() => _method = v!),
                     ),
                   ),
@@ -306,16 +376,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 // Send button
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  child: ElevatedButton.icon(
-                    onPressed: proxy.isSending ? null : _sendRequest,
-                    icon: proxy.isSending
-                        ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : const Icon(Icons.send_rounded, size: 18),
-                    label: Text(proxy.isSending ? 'Sending...' : 'Send'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: cs.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: SizedBox(
+                    height: 40,
+                    child: ElevatedButton.icon(
+                      onPressed: proxy.isSending ? null : _sendRequest,
+                      icon: proxy.isSending
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white))
+                          : const Icon(CupertinoIcons.paperplane_fill, size: 18),
+                      label: Text(proxy.isSending ? 'Sending...' : 'Send',style: GoogleFonts.roboto(),),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                      ),
                     ),
                   ),
                 ),
@@ -387,7 +465,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 color: Theme.of(context).colorScheme.primary,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text('$count', style: const TextStyle(color: Colors.white, fontSize: 10)),
+              child: Text('$count',
+                  style: const TextStyle(color: Colors.white, fontSize: 10)),
             ),
           ],
         ],
@@ -455,10 +534,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const SizedBox(height: 60),
-                  Icon(Icons.send_rounded, size: 56, color: Theme.of(context).colorScheme.primary.withOpacity(0.3)),
+                  Icon(CupertinoIcons.paperplane_fill,
+                      size: 56,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .primary
+                          .withOpacity(0.3)),
                   const SizedBox(height: 14),
                   const Text('Send a request to see the response',
-                      style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                      style: TextStyle(
+                          color: AppColors.textSecondary, fontSize: 14)),
                 ],
               ),
             ),
@@ -480,7 +565,11 @@ class _KVEditor extends StatefulWidget {
   final String valueHint;
   final ValueChanged<List<_KVEntry>> onChanged;
 
-  const _KVEditor({required this.entries, required this.keyHint, required this.valueHint, required this.onChanged});
+  const _KVEditor(
+      {required this.entries,
+      required this.keyHint,
+      required this.valueHint,
+      required this.onChanged});
 
   @override
   State<_KVEditor> createState() => _KVEditorState();
@@ -511,27 +600,47 @@ class _KVEditorState extends State<_KVEditor> {
                 padding: const EdgeInsets.only(bottom: 8),
                 child: Row(
                   children: [
-                    Checkbox(value: e.enabled, onChanged: (v) { setState(() => e.enabled = v!); _notify(); }),
+                    Checkbox(
+                        value: e.enabled,
+                        onChanged: (v) {
+                          setState(() => e.enabled = v!);
+                          _notify();
+                        }),
                     Expanded(
                       child: TextField(
-                        decoration: InputDecoration(hintText: widget.keyHint, isDense: true),
+                        decoration: InputDecoration(
+                            hintText: widget.keyHint, isDense: true),
                         style: const TextStyle(fontSize: 13),
-                        onChanged: (v) { e.key = v; _notify(); },
-                        controller: TextEditingController(text: e.key)..selection = TextSelection.collapsed(offset: e.key.length),
+                        onChanged: (v) {
+                          e.key = v;
+                          _notify();
+                        },
+                        controller: TextEditingController(text: e.key)
+                          ..selection =
+                              TextSelection.collapsed(offset: e.key.length),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
-                        decoration: InputDecoration(hintText: widget.valueHint, isDense: true),
+                        decoration: InputDecoration(
+                            hintText: widget.valueHint, isDense: true),
                         style: const TextStyle(fontSize: 13),
-                        onChanged: (v) { e.value = v; _notify(); },
-                        controller: TextEditingController(text: e.value)..selection = TextSelection.collapsed(offset: e.value.length),
+                        onChanged: (v) {
+                          e.value = v;
+                          _notify();
+                        },
+                        controller: TextEditingController(text: e.value)
+                          ..selection =
+                              TextSelection.collapsed(offset: e.value.length),
                       ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.close, size: 16),
-                      onPressed: () { setState(() => _entries.removeAt(idx)); _notify(); },
+                      onPressed: () {
+                        setState(() => _entries.removeAt(idx));
+                        _notify();
+                      },
                     ),
                   ],
                 ),
@@ -544,7 +653,10 @@ class _KVEditorState extends State<_KVEditor> {
           child: TextButton.icon(
             icon: const Icon(Icons.add, size: 16),
             label: const Text('Add'),
-            onPressed: () { setState(() => _entries.add(_KVEntry())); _notify(); },
+            onPressed: () {
+              setState(() => _entries.add(_KVEntry()));
+              _notify();
+            },
           ),
         ),
       ],
@@ -558,7 +670,10 @@ class _BodyEditor extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onTypeChanged;
 
-  const _BodyEditor({required this.bodyType, required this.controller, required this.onTypeChanged});
+  const _BodyEditor(
+      {required this.bodyType,
+      required this.controller,
+      required this.onTypeChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -588,7 +703,9 @@ class _BodyEditor extends StatelessWidget {
                 textAlignVertical: TextAlignVertical.top,
                 style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
                 decoration: InputDecoration(
-                  hintText: bodyType == 'json' ? '{"key": "value"}' : 'Enter request body...',
+                  hintText: bodyType == 'json'
+                      ? '{"key": "value"}'
+                      : 'Enter request body...',
                   alignLabelWithHint: true,
                 ),
               ),
@@ -617,7 +734,11 @@ class _AuthEditor extends StatelessWidget {
             spacing: 8,
             children: ['none', 'bearer', 'basic'].map((t) {
               return ChoiceChip(
-                label: Text(t == 'bearer' ? 'Bearer Token' : t == 'basic' ? 'Basic Auth' : 'None'),
+                label: Text(t == 'bearer'
+                    ? 'Bearer Token'
+                    : t == 'basic'
+                        ? 'Basic Auth'
+                        : 'None'),
                 selected: auth.type == t,
                 onSelected: (_) => onChanged(auth.copyWith(type: t)),
               );
@@ -634,16 +755,22 @@ class _AuthEditor extends StatelessWidget {
                 prefixIcon: Icon(Icons.vpn_key_outlined),
               ),
               onChanged: (v) => onChanged(auth.copyWith(token: v)),
-              controller: TextEditingController(text: auth.token)..selection = TextSelection.collapsed(offset: auth.token.length),
+              controller: TextEditingController(text: auth.token)
+                ..selection =
+                    TextSelection.collapsed(offset: auth.token.length),
             ),
           ),
         if (auth.type == 'basic') ...[
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: TextField(
-              decoration: const InputDecoration(labelText: 'Username', prefixIcon: Icon(Icons.person_outline)),
+              decoration: const InputDecoration(
+                  labelText: 'Username',
+                  prefixIcon: Icon(CupertinoIcons.person)),
               onChanged: (v) => onChanged(auth.copyWith(username: v)),
-              controller: TextEditingController(text: auth.username)..selection = TextSelection.collapsed(offset: auth.username.length),
+              controller: TextEditingController(text: auth.username)
+                ..selection =
+                    TextSelection.collapsed(offset: auth.username.length),
             ),
           ),
           const SizedBox(height: 10),
@@ -651,9 +778,12 @@ class _AuthEditor extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: TextField(
               obscureText: true,
-              decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
+              decoration: const InputDecoration(
+                  labelText: 'Password', prefixIcon: Icon(CupertinoIcons.lock)),
               onChanged: (v) => onChanged(auth.copyWith(password: v)),
-              controller: TextEditingController(text: auth.password)..selection = TextSelection.collapsed(offset: auth.password.length),
+              controller: TextEditingController(text: auth.password)
+                ..selection =
+                    TextSelection.collapsed(offset: auth.password.length),
             ),
           ),
         ],
@@ -672,8 +802,12 @@ class _InlineSnippetView extends StatefulWidget {
   final AuthConfig auth;
 
   const _InlineSnippetView({
-    required this.method, required this.url, required this.headers,
-    required this.params, this.body, required this.auth,
+    required this.method,
+    required this.url,
+    required this.headers,
+    required this.params,
+    this.body,
+    required this.auth,
   });
 
   @override
@@ -686,10 +820,15 @@ class _InlineSnippetViewState extends State<_InlineSnippetView> {
   String _snippet = '';
 
   @override
-  void initState() { super.initState(); _load(); }
+  void initState() {
+    super.initState();
+    _load();
+  }
 
   Future<void> _load() async {
-    setState(() { _loading = true; });
+    setState(() {
+      _loading = true;
+    });
     final proxy = context.read<ProxyService>();
     await proxy.fetchSnippet(
       type: _type,
@@ -700,7 +839,12 @@ class _InlineSnippetViewState extends State<_InlineSnippetView> {
       body: widget.body,
       auth: widget.auth,
     );
-    if (mounted) setState(() { _snippet = proxy.snippet; _loading = false; });
+    if (mounted) {
+      setState(() {
+        _snippet = proxy.snippet;
+        _loading = false;
+      });
+    }
   }
 
   @override
@@ -709,11 +853,18 @@ class _InlineSnippetViewState extends State<_InlineSnippetView> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-          child: Wrap(spacing: 8, children: ['curl', 'fetch'].map((t) => ChoiceChip(
-            label: Text(t == 'fetch' ? 'JS fetch' : 'curl'),
-            selected: _type == t,
-            onSelected: (_) { setState(() => _type = t); _load(); },
-          )).toList()),
+          child: Wrap(
+              spacing: 8,
+              children: ['curl', 'fetch']
+                  .map((t) => ChoiceChip(
+                        label: Text(t == 'fetch' ? 'JS fetch' : 'curl'),
+                        selected: _type == t,
+                        onSelected: (_) {
+                          setState(() => _type = t);
+                          _load();
+                        },
+                      ))
+                  .toList()),
         ),
         Expanded(
           child: _loading
@@ -729,15 +880,24 @@ class _InlineSnippetViewState extends State<_InlineSnippetView> {
                     child: Stack(children: [
                       SingleChildScrollView(
                         child: SelectableText(_snippet,
-                            style: const TextStyle(fontFamily: 'monospace', color: Colors.greenAccent, fontSize: 13, height: 1.6)),
+                            style: const TextStyle(
+                                fontFamily: 'monospace',
+                                color: Colors.greenAccent,
+                                fontSize: 13,
+                                height: 1.6)),
                       ),
                       Positioned(
-                        top: 0, right: 0,
+                        top: 0,
+                        right: 0,
                         child: IconButton(
-                          icon: const Icon(Icons.copy, color: Colors.white70, size: 18),
+                          icon: const Icon(Icons.copy,
+                              color: Colors.white70, size: 18),
                           onPressed: () {
                             Clipboard.setData(ClipboardData(text: _snippet));
-                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copied!'), duration: Duration(seconds: 1)));
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text('Copied!'),
+                                    duration: Duration(seconds: 1)));
                           },
                         ),
                       ),

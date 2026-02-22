@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../theme/app_theme.dart';
 import '../services/auth_service.dart';
@@ -38,17 +40,27 @@ class SidebarDrawer extends StatelessWidget {
                       color: Colors.white.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
-                    child: const Icon(Icons.api_rounded, color: Colors.white, size: 24),
+                    child: const ImageIcon(
+                      AssetImage("assets/logo/logoApp_rm.png"),
+                      size: 50,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('APIForge', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18)),
+                        Text('APIForge',
+                            style: GoogleFonts.abhayaLibre(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 28)),
                         Text(
                           auth.user?.name ?? '',
-                          style: TextStyle(color: Colors.white.withOpacity(0.85), fontSize: 13),
+                          style: GoogleFonts.poppins(
+                              color: Colors.white.withOpacity(0.85),
+                              fontSize: 13),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -65,16 +77,19 @@ class SidebarDrawer extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 children: [
                   _DrawerItem(
-                    icon: Icons.home_outlined,
+                    icon: CupertinoIcons.home,
                     title: 'Request Builder',
                     onTap: () => Navigator.pop(context),
                   ),
                   _DrawerItem(
-                    icon: Icons.folder_outlined,
+                    icon: CupertinoIcons.folder,
                     title: 'Collections',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const CollectionsScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const CollectionsScreen()));
                     },
                   ),
                   _DrawerItem(
@@ -82,45 +97,54 @@ class SidebarDrawer extends StatelessWidget {
                     title: 'History',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const HistoryScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const HistoryScreen()));
                     },
                   ),
                   _DrawerItem(
-                    icon: Icons.settings_outlined,
+                    icon: CupertinoIcons.settings,
                     title: 'Environment & Settings',
                     onTap: () {
                       Navigator.pop(context);
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const SettingsScreen()));
                     },
                   ),
                   const Divider(),
                   // Theme mode selector
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(left: 4, bottom: 8),
-                          child: Text('Theme', style: Theme.of(context).textTheme.labelMedium),
+                          child: Text('Theme',
+                              style: Theme.of(context).textTheme.labelMedium),
                         ),
                         SegmentedButton<ThemeMode>(
                           showSelectedIcon: false,
-                          segments: const [
+                          segments:  [
                             ButtonSegment(
                               value: ThemeMode.light,
-                              icon: Icon(Icons.light_mode_outlined, size: 16),
-                              label: Text('Light'),
+                              icon: const Icon(CupertinoIcons.sun_max_fill, size: 16),
+                              label: Text('Light',style: GoogleFonts.abhayaLibre()),
                             ),
                             ButtonSegment(
                               value: ThemeMode.system,
-                              icon: Icon(Icons.brightness_auto_outlined, size: 16),
-                              label: Text('System'),
+                              icon: const Icon(Icons.brightness_auto_outlined,
+                                  size: 16),
+                              label: Text('System',style: GoogleFonts.abhayaLibre(),),
                             ),
                             ButtonSegment(
                               value: ThemeMode.dark,
-                              icon: Icon(Icons.dark_mode_outlined, size: 16),
-                              label: Text('Dark'),
+                              icon: const Icon(CupertinoIcons.moon_fill, size: 16),
+                              label: Text('Dark',style: GoogleFonts.abhayaLibre()),
                             ),
                           ],
                           selected: {themeProvider.themeMode},
@@ -161,7 +185,8 @@ class _DrawerItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _DrawerItem({required this.icon, required this.title, required this.onTap});
+  const _DrawerItem(
+      {required this.icon, required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
