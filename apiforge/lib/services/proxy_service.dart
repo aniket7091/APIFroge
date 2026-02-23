@@ -163,6 +163,13 @@ class ProxyService extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Manually set a result (e.g. from AI assistant)
+  void setResult(ProxyResult result) {
+    _lastResult = result;
+    _error = result.isError ? result.errorMessage : null;
+    notifyListeners();
+  }
+
   String _extractError(dynamic e) {
     try {
       final data = (e as dynamic).response?.data;

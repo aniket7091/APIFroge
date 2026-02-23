@@ -24,21 +24,21 @@ class AppThemeProvider extends ChangeNotifier {
 
 abstract class AppColors {
   // ── Dark palette ──────────────────────────────────────────────────────────
-  static const darkBg = Color(0xFF0D0D0F);
-  static const darkSurface = Color(0xFF161618);
-  static const darkCard = Color(0xFF1E1E22);
-  static const darkBorder = Color(0xFF2A2A30);
+  static const darkBg = Color(0xFF101622);
+  static const darkSurface = Color(0xFF1B2431);
+  static const darkCard = Color(0xFF1B2431);
+  static const darkBorder = Color(0xFF2D3646);
 
   // ── Light palette ─────────────────────────────────────────────────────────
-  static const lightBg = Color(0xFFF5F5F7);
+  static const lightBg = Color(0xFFF5F6F8);
   static const lightSurface = Color(0xFFFFFFFF);
-  static const lightCard = Color(0xFFF0F0F5);
-  static const lightBorder = Color(0xFFE0E0E8);
+  static const lightCard = Color(0xFFFFFFFF);
+  static const lightBorder = Color(0xFFE5E7EB);
 
   // ── Accents ───────────────────────────────────────────────────────────────
-  static const accent = Color(0xFF6C63FF);
-  static const accentLight = Color(0xFF8B83FF);
-  static const accentDark = Color(0xFF5550CC);
+  static const accent = Color(0xFF0D59F2);
+  static const accentLight = Color(0xFF3B82F6);
+  static const accentDark = Color(0xFF1D4ED8);
 
   // ── HTTP Method colors ────────────────────────────────────────────────────
   static const get = Color(0xFF4CAF50);
@@ -61,6 +61,8 @@ abstract class AppColors {
   static const textSecondary = Color(0xFF9090A8);
   static const divider = Color(0xFF2A2A30);
 }
+
+
 
 abstract class AppTheme {
   static ThemeData darkTheme() {
@@ -230,3 +232,5 @@ abstract class AppTheme {
     return AppColors.statusError;
   }
 }
+
+

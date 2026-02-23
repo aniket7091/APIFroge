@@ -15,6 +15,7 @@ const collectionRoutes = require('./routes/collections');
 const requestRoutes = require('./routes/requests');
 const historyRoutes = require('./routes/history');
 const proxyRoutes = require('./routes/proxy');
+const aiRoutes = require('./routes/ai');
 
 // Connect to MongoDB
 connectDB();
@@ -36,6 +37,7 @@ app.use('/api/collections', collectionRoutes);
 app.use('/api/requests', requestRoutes);
 app.use('/api/history', historyRoutes);
 app.use('/api/proxy', proxyRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

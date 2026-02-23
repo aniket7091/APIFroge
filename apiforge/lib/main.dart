@@ -9,6 +9,7 @@ import 'services/collection_service.dart';
 import 'services/history_service.dart';
 import 'services/proxy_service.dart';
 import 'services/request_service.dart';
+import 'services/ai_service.dart';
 import 'utils/storage_utils.dart';
 
 void main() async {
@@ -32,6 +33,7 @@ class APIForgeApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => HistoryService()),
         ChangeNotifierProvider(create: (_) => ProxyService()),
         ChangeNotifierProvider(create: (_) => RequestService()),
+        ChangeNotifierProvider(create: (_) => AiService()),
       ],
       child: Consumer<AppThemeProvider>(
         builder: (context, themeProvider, _) {

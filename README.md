@@ -12,6 +12,7 @@
 |  **Collections** | Create, edit, delete collections with color labels |
 |  **History** | Auto-logged request history with pagination |
 |  **JWT Auth** | Signup/Login + Bearer & Basic auth support |
+|  **AI Automation Assistant** | Describe a task in natural language, and generate/execute the API request automatically via Groq LLM |
 |  **Environment Variables** | `{{VAR_NAME}}` interpolation in URLs |
 |  **Code Snippets** | Generate `curl` & JS `fetch` code |
 |  **Dark / Light Mode** | Persistent, togglable from the sidebar |
@@ -25,7 +26,7 @@
 APIForge/
 ├── backend/               # Node.js + Express API
 │   ├── config/            # MongoDB connection
-│   ├── controllers/       # Auth, Collection, Request, History, Proxy
+│   ├── controllers/       # Auth, Collection, Request, History, Proxy, AI
 │   ├── middleware/        # JWT auth, error handler, validation
 │   ├── models/            # User, Collection, Request, History schemas
 │   ├── routes/            # REST routes
@@ -70,6 +71,7 @@ npm install
 # MONGO_URI=mongodb://localhost:27017/apiforge
 # JWT_SECRET=your_secret_key
 # PORT=5000
+# GROQ_API_KEY=your_groq_api_key   # Required for AI Assistant
 
 # 4. Start MongoDB (skip if using Atlas)
 mongod
@@ -102,6 +104,7 @@ The API will be available at **http://localhost:5000/api**
 | POST | `/api/proxy/send` | ✅ | Forward HTTP request |
 | POST | `/api/proxy/snippet` | ✅ | Generate code snippet |
 | POST | `/api/proxy/performance` | ✅ | Run multiple requests |
+| POST | `/api/ai/execute` | ✅ | Generate & execute AI prompt |
 | GET | `/api/health` | ❌ | Health check |
 
 ---
@@ -179,10 +182,11 @@ Update `_baseUrl` in `lib/services/api_client.dart` to your production backend U
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Flutter 3.27+, Provider, Dio, Google Fonts |
-| Backend | Node.js, Express, Axios |
+| Backend | Node.js, Express, Axios, Groq SDK |
 | Database | MongoDB, Mongoose |
 | Auth | bcryptjs, jsonwebtoken |
 | Storage | SharedPreferences (Flutter), dotenv |
+| AI / LLM | Groq Cloud API |
 
 ---
 
