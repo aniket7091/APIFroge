@@ -6,7 +6,7 @@ import 'api_client.dart';
 /// Manages authentication state: login, signup, logout, restore session.
 class AuthService extends ChangeNotifier {
   UserModel? _user;
-  bool _isLoading = true;
+  bool _isLoading = false;
   String? _error;
 
   UserModel? get user => _user;
