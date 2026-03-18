@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 
 /// Singleton Dio instance configured to point at the APIForge backend.
 abstract class ApiClient {
-  static const String _baseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://localhost:8000/api');
+  static const String _baseUrl = String.fromEnvironment('API_URL', defaultValue: 'https://apiforge-backend-abtv.onrender.com/api');
 
   static final Dio _dio = Dio(BaseOptions(
     baseUrl: _baseUrl,
