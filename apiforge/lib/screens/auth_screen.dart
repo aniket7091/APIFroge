@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import 'home_screen.dart';
 
 /// App sleek dark theme Auth Screen
 class AuthScreen extends StatefulWidget {
@@ -65,8 +66,11 @@ class _AuthScreenState extends State<AuthScreen>
       ),
     );
 
-    // 👉 Navigate to home screen
-    // Navigator.pushReplacement(...)
+    // 👉 Navigate to Home
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
   } else if (auth.error != null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -98,8 +102,14 @@ class _AuthScreenState extends State<AuthScreen>
       ),
     );
 
-    // 👉 OPTIONAL: switch to login tab
-    _tabController.animateTo(0);
+    // 👉 Navigate to Home (auto login feel)
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+    );
+
+    // 👉 OR if you want login first, use this instead:
+    // _tabController.animateTo(0);
   } else if (auth.error != null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
