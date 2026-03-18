@@ -34,6 +34,7 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<bool> signup(String name, String email, String password) async {
+    _isLoading = true;
     _error = null;
     notifyListeners();
     try {
@@ -45,6 +46,7 @@ class AuthService extends ChangeNotifier {
         await StorageUtils.setToken(token);
         ApiClient.setToken(token);
         _user = UserModel.fromJson(res.data['user']);
+        _isLoading = false;
         notifyListeners();
         return true;
       }
@@ -52,11 +54,13 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       _error = _extractError(e);
     }
+    _isLoading = false;
     notifyListeners();
     return false;
   }
 
   Future<bool> login(String email, String password) async {
+    _isLoading = true;
     _error = null;
     notifyListeners();
     try {
@@ -68,6 +72,7 @@ class AuthService extends ChangeNotifier {
         await StorageUtils.setToken(token);
         ApiClient.setToken(token);
         _user = UserModel.fromJson(res.data['user']);
+        _isLoading = false;
         notifyListeners();
         return true;
       }
@@ -75,6 +80,7 @@ class AuthService extends ChangeNotifier {
     } catch (e) {
       _error = _extractError(e);
     }
+    _isLoading = false;
     notifyListeners();
     return false;
   }
