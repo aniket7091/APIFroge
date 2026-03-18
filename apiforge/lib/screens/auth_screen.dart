@@ -46,27 +46,69 @@ class _AuthScreenState extends State<AuthScreen>
   }
 
   Future<void> _login() async {
-    if (!_loginFormKey.currentState!.validate()) return;
-    final auth = context.read<AuthService>();
-    await auth.login(_loginEmailCtrl.text.trim(), _loginPassCtrl.text);
-    if (mounted && auth.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(auth.error!), backgroundColor: Colors.red),
-      );
-    }
+  if (!_loginFormKey.currentState!.validate()) return;
+
+  final auth = context.read<AuthService>();
+
+  bool success = await auth.login(
+    _loginEmailCtrl.text.trim(),
+    _loginPassCtrl.text,
+  );
+
+  if (!mounted) return;
+
+  if (success) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Login successful 🚀"),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // 👉 Navigate to home screen
+    // Navigator.pushReplacement(...)
+  } else if (auth.error != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(auth.error!),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
 
   Future<void> _signup() async {
-    if (!_signupFormKey.currentState!.validate()) return;
-    final auth = context.read<AuthService>();
-    await auth.signup(_nameCtrl.text.trim(), _signupEmailCtrl.text.trim(),
-        _signupPassCtrl.text);
-    if (mounted && auth.error != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(auth.error!), backgroundColor: Colors.red),
-      );
-    }
+  if (!_signupFormKey.currentState!.validate()) return;
+
+  final auth = context.read<AuthService>();
+
+  bool success = await auth.signup(
+    _nameCtrl.text.trim(),
+    _signupEmailCtrl.text.trim(),
+    _signupPassCtrl.text,
+  );
+
+  if (!mounted) return;
+
+  if (success) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Signup successful 🎉"),
+        backgroundColor: Colors.green,
+      ),
+    );
+
+    // 👉 OPTIONAL: switch to login tab
+    _tabController.animateTo(0);
+  } else if (auth.error != null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(auth.error!),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
