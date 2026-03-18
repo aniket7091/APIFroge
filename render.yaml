@@ -1,0 +1,29 @@
+services:
+  # Node.js Backend API
+  - type: web
+    name: apiforge-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URI
+        sync: false # Render will prompt you to enter this in the dashboard
+      - key: JWT_SECRET
+        generateValue: true
+
+  # Flutter Web Frontend
+  - type: web
+    name: apiforge-frontend
+    env: static
+    rootDir: apiforge
+    buildCommand: ./render-build.sh
+    staticPublishPath: build/web
+    envVars:
+      - key: API_URL
+        fromService:
+          type: web
+          name: apiforge-backend
+          property: host

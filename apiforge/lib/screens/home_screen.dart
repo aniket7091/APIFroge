@@ -87,20 +87,25 @@ class _KVEntry {
 }
 
 // ── Responsive helpers ────────────────────────────────────────────────────────
+const _kDesktop = 900.0; // full 3-column layout
+const _kMobile  = 600.0; // bottom nav, no icon rail
+
+bool _isDesktop(BuildContext ctx) => MediaQuery.of(ctx).size.width >= _kDesktop;
+bool _isMobile(BuildContext ctx)  => MediaQuery.of(ctx).size.width < _kMobile;
+
 double _sidebarW(BuildContext ctx) {
   final w = MediaQuery.of(ctx).size.width;
-  if (w < 900) return 180;
+  if (w < _kDesktop) return 0;   // hidden – shown in drawer
+  if (w < 1100) return 200;
   return 240;
 }
 
 double _responseW(BuildContext ctx) {
   final w = MediaQuery.of(ctx).size.width;
-  if (w < 900) return 0;
+  if (w < _kDesktop) return 0;   // shown as bottom panel
   if (w < 1100) return 320;
   return 400;
 }
-
-bool _isNarrow(BuildContext ctx) => MediaQuery.of(ctx).size.width < 900;
 
 // ── Main Screen ───────────────────────────────────────────────────────────────
 class HomeScreen extends StatefulWidget {
@@ -127,6 +132,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final _envValCtrl = TextEditingController();
   late TabController _requestTabCtrl;
   bool _showResponsePanel = false;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   static const _methods = [
     'GET',
@@ -473,78 +479,119 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final proxy = context.watch<ProxyService>();
-    final narrow = _isNarrow(context);
-    final rw = _responseW(context);
+    final desktop = _isDesktop(context);
+    final mobile  = _isMobile(context);
+    final narrow  = !desktop;
+    final rw      = _responseW(context);
 
-    return Scaffold(
-      backgroundColor: _C.bg,
-      body: SafeArea(
-        child: Column(children: [
-          _TopBar(breadcrumb: _breadcrumb, narrow: narrow),
-          Expanded(
-            child:
-                Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              // Left nav
-              _LeftNav(
-                  index: _navIndex,
-                  onTap: (i) => setState(() => _navIndex = i)),
-              // AI assistant full screen
-              if (_navIndex == 3)
-                Expanded(child: AiAssistantScreen(
-                  onLoadInEditor: (req) {
-                    _handleAiRequest(req);
-                  },
-                ))
-              else
-                // Main 3-column layout
-                Expanded(
-                    child: Row(
+    // ── Shared editor column ──────────────────────────────────────────────
+    Widget editorColumn = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _UrlBar(
+          method: _method,
+          methods: _methods,
+          urlCtrl: _urlCtrl,
+          isSending: proxy.isSending,
+          onMethodChanged: (m) => setState(() => _method = m),
+          onSend: _sendRequest,
+          onSave: _saveRequest,
+          narrow: narrow,
+          showResp: _showResponsePanel && proxy.lastResult != null,
+          onToggleResp: () =>
+              setState(() => _showResponsePanel = !_showResponsePanel),
+        ),
+        _ReqTabs(
+            ctrl: _requestTabCtrl,
+            headerCount: _kvToMap(_headers).length),
+        Expanded(child: _buildTabContent()),
+        // ── Bottom response panel (tablet/mobile) ────────────────────────
+        if (narrow && _showResponsePanel && proxy.lastResult != null)
+          _BottomResponsePanel(
+            proxy: proxy,
+            onSave: _saveRequest,
+            onClose: () => setState(() => _showResponsePanel = false),
+          ),
+      ],
+    );
+
+    // ── Desktop layout (≥ 900 px) ─────────────────────────────────────────
+    if (desktop) {
+      return Scaffold(
+        backgroundColor: _C.bg,
+        body: SafeArea(
+          child: Column(children: [
+            _TopBar(breadcrumb: _breadcrumb, narrow: false),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _LeftNav(
+                      index: _navIndex,
+                      onTap: (i) => setState(() => _navIndex = i)),
+                  if (_navIndex == 3)
+                    Expanded(
+                      child: AiAssistantScreen(
+                        onLoadInEditor: _handleAiRequest,
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: Row(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                      // Sidebar
-                      SizedBox(
-                        width: _sidebarW(context),
-                        child: _buildSidePanel(),
-                      ),
-                      // Editor column
-                      Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                            _UrlBar(
-                              method: _method,
-                              methods: _methods,
-                              urlCtrl: _urlCtrl,
-                              isSending: proxy.isSending,
-                              onMethodChanged: (m) =>
-                                  setState(() => _method = m),
-                              onSend: _sendRequest,
+                          SizedBox(
+                            width: _sidebarW(context),
+                            child: _buildSidePanel(),
+                          ),
+                          Expanded(child: editorColumn),
+                          if (rw > 0)
+                            _ResponsePanel(
+                              proxy: proxy,
+                              width: rw,
                               onSave: _saveRequest,
-                              narrow: narrow,
-                              showResp: _showResponsePanel &&
-                                  proxy.lastResult != null,
-                              onToggleResp: () => setState(() =>
-                                  _showResponsePanel = !_showResponsePanel),
                             ),
-                            _ReqTabs(
-                                ctrl: _requestTabCtrl,
-                                headerCount: _kvToMap(_headers).length),
-                            Expanded(child: _buildTabContent()),
-                          ])),
-                      // Response panel
-                      if (rw > 0 ||
-                          (narrow &&
-                              _showResponsePanel &&
-                              proxy.lastResult != null))
-                        _ResponsePanel(
-                          proxy: proxy,
-                          width: narrow
-                              ? MediaQuery.of(context).size.width * 0.5
-                              : rw,
-                          onSave: _saveRequest,
-                        ),
-                    ])),
-            ]),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ]),
+        ),
+      );
+    }
+
+    // ── Tablet / Mobile layout (< 900 px) ─────────────────────────────────
+    return Scaffold(
+      key: _scaffoldKey,
+      backgroundColor: _C.bg,
+      // Sidebar in a Drawer
+      drawer: _SideDrawer(
+        navIndex: _navIndex,
+        onNavChange: (i) {
+          setState(() => _navIndex = i);
+          _scaffoldKey.currentState?.closeDrawer();
+        },
+        sidePanel: _buildSidePanel(),
+      ),
+      // Bottom nav for mobile
+      bottomNavigationBar: mobile
+          ? _BottomNav(
+              index: _navIndex,
+              onTap: (i) => setState(() => _navIndex = i))
+          : null,
+      body: SafeArea(
+        child: Column(children: [
+          _TopBar(
+            breadcrumb: _breadcrumb,
+            narrow: true,
+            onMenu: () => _scaffoldKey.currentState?.openDrawer(),
+          ),
+          Expanded(
+            child: _navIndex == 3
+                ? AiAssistantScreen(onLoadInEditor: _handleAiRequest)
+                : editorColumn,
           ),
         ]),
       ),
@@ -721,7 +768,8 @@ class _ResponsePanel extends StatelessWidget {
 class _TopBar extends StatelessWidget {
   final String breadcrumb;
   final bool narrow;
-  const _TopBar({required this.breadcrumb, required this.narrow});
+  final VoidCallback? onMenu;
+  const _TopBar({required this.breadcrumb, required this.narrow, this.onMenu});
 
   @override
   Widget build(BuildContext context) {
@@ -732,6 +780,19 @@ class _TopBar extends StatelessWidget {
       decoration: const BoxDecoration(
           color: _C.bg, border: Border(bottom: BorderSide(color: _C.border))),
       child: Row(children: [
+        // Hamburger on tablet/mobile
+        if (narrow && onMenu != null) ...[
+          InkWell(
+            onTap: onMenu,
+            borderRadius: BorderRadius.circular(6),
+            child: const SizedBox(
+              width: 36,
+              height: 36,
+              child: Icon(Icons.menu_rounded, size: 18, color: _C.muted),
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
         Container(
             width: 26,
             height: 26,
@@ -742,7 +803,10 @@ class _TopBar extends StatelessWidget {
                   BoxShadow(
                       color: _C.accentGlow, blurRadius: 10, spreadRadius: 1)
                 ]),
-            child:  const ImageIcon(AssetImage('assets/logo/logoApp_rm.png'), color: Colors.white, size: 22)),
+            child: const ImageIcon(
+                AssetImage('assets/logo/logoApp_rm.png'),
+                color: Colors.white,
+                size: 22)),
         const SizedBox(width: 8),
         if (!narrow) ...[
           Text('APIForge',
@@ -821,6 +885,304 @@ class _TopBar extends StatelessWidget {
           ),
         ),
       ]),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SIDE DRAWER  (tablet / mobile)
+// ─────────────────────────────────────────────────────────────────────────────
+class _SideDrawer extends StatelessWidget {
+  final int navIndex;
+  final ValueChanged<int> onNavChange;
+  final Widget sidePanel;
+  const _SideDrawer({
+    required this.navIndex,
+    required this.onNavChange,
+    required this.sidePanel,
+  });
+
+  static const _labels = [
+    'Home',
+    'Collections',
+    'History',
+    'AI Assistant',
+    'Settings',
+  ];
+  static const _icons = [
+    Icons.home_outlined,
+    Icons.folder_outlined,
+    Icons.history_outlined,
+    Icons.auto_awesome_outlined,
+    Icons.settings_outlined,
+  ];
+  static const _activeIcons = [
+    Icons.home,
+    Icons.folder,
+    Icons.history,
+    Icons.auto_awesome,
+    Icons.settings,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final sw = MediaQuery.of(context).size.width;
+    final drawerW = (sw * 0.82).clamp(240.0, 320.0);
+    return Drawer(
+      width: drawerW,
+      backgroundColor: _C.bg,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Header
+          SafeArea(
+            bottom: false,
+            child: Container(
+              height: 52,
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: _C.border))),
+              child: Row(children: [
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: _C.accent,
+                    borderRadius: BorderRadius.circular(7),
+                    boxShadow: const [
+                      BoxShadow(
+                          color: _C.accentGlow, blurRadius: 10, spreadRadius: 1)
+                    ],
+                  ),
+                  child: const ImageIcon(
+                      AssetImage('assets/logo/logoApp_rm.png'),
+                      color: Colors.white,
+                      size: 22),
+                ),
+                const SizedBox(width: 10),
+                Text('APIForge',
+                    style: _T.display.copyWith(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                        color: _C.text,
+                        letterSpacing: -0.3)),
+                const Spacer(),
+                InkWell(
+                  onTap: () => Navigator.of(context).pop(),
+                  borderRadius: BorderRadius.circular(6),
+                  child: const SizedBox(
+                    width: 32,
+                    height: 32,
+                    child: Icon(Icons.close, size: 16, color: _C.muted),
+                  ),
+                ),
+              ]),
+            ),
+          ),
+          // Nav items
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+            child: Column(
+              children: List.generate(5, (i) {
+                final on = i == navIndex;
+                final col = i == 3 ? _C.purple : null;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 1),
+                  child: InkWell(
+                    onTap: () => onNavChange(i),
+                    borderRadius: BorderRadius.circular(8),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 140),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 9),
+                      decoration: BoxDecoration(
+                        color: on ? _C.surface2 : Colors.transparent,
+                        borderRadius: BorderRadius.circular(8),
+                        border: on ? Border.all(color: _C.border2) : null,
+                      ),
+                      child: Row(children: [
+                        Icon(
+                          on ? _activeIcons[i] : _icons[i],
+                          size: 17,
+                          color:
+                              on ? (col ?? _C.accent2) : (col ?? _C.muted),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          _labels[i],
+                          style: _T.display.copyWith(
+                            fontSize: 13,
+                            fontWeight:
+                                on ? FontWeight.w600 : FontWeight.w400,
+                            color: on ? _C.text : _C.muted,
+                          ),
+                        ),
+                      ]),
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+          const Divider(color: _C.border, height: 1),
+          // Side panel for current nav item (except AI=3)
+          if (navIndex != 3)
+            Expanded(child: sidePanel),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOTTOM RESPONSE PANEL  (tablet / mobile)
+// ─────────────────────────────────────────────────────────────────────────────
+class _BottomResponsePanel extends StatelessWidget {
+  final ProxyService proxy;
+  final VoidCallback onSave;
+  final VoidCallback onClose;
+  const _BottomResponsePanel(
+      {required this.proxy, required this.onSave, required this.onClose});
+
+  @override
+  Widget build(BuildContext context) {
+    final h = (MediaQuery.of(context).size.height * 0.45).clamp(260.0, 480.0);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 220),
+      curve: Curves.easeOut,
+      height: h,
+      decoration: const BoxDecoration(
+        color: _C.surface,
+        border: Border(top: BorderSide(color: _C.border2, width: 1.5)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Handle bar + close
+          Container(
+            height: 36,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: const BoxDecoration(
+                border: Border(bottom: BorderSide(color: _C.border))),
+            child: Row(children: [
+              const Text('RESPONSE',
+                  style: TextStyle(
+                      fontFamily: 'Syne',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 1.2,
+                      color: _C.muted)),
+              const Spacer(),
+              InkWell(
+                onTap: onClose,
+                borderRadius: BorderRadius.circular(6),
+                child: const SizedBox(
+                  width: 28,
+                  height: 28,
+                  child: Icon(Icons.keyboard_arrow_down_rounded,
+                      size: 18, color: _C.muted),
+                ),
+              ),
+            ]),
+          ),
+          Expanded(
+            child: proxy.lastResult == null
+                ? const Center(
+                    child: Text('No response yet',
+                        style: TextStyle(
+                            fontFamily: 'IBMPlexMono',
+                            fontSize: 12,
+                            color: _C.muted)))
+                : ResponseViewer(
+                    statusCode: proxy.lastResult!.statusCode,
+                    statusText: proxy.lastResult!.statusText,
+                    body: proxy.lastResult!.body,
+                    headers: proxy.lastResult!.headers,
+                    responseTime: proxy.lastResult!.responseTime,
+                    isError: proxy.lastResult!.isError,
+                    errorMessage: proxy.lastResult!.errorMessage,
+                  ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: _FOutlineBtn(
+                onPressed: onSave,
+                icon: Icons.download_outlined,
+                label: 'Save as Example'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BOTTOM NAV  (mobile < 600 px)
+// ─────────────────────────────────────────────────────────────────────────────
+class _BottomNav extends StatelessWidget {
+  final int index;
+  final ValueChanged<int> onTap;
+  const _BottomNav({required this.index, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 56,
+      decoration: const BoxDecoration(
+        color: _C.bg,
+        border: Border(top: BorderSide(color: _C.border)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _BNItem(icon: Icons.home_outlined, active: Icons.home,          label: 'Home',        i: 0, cur: index, onTap: onTap),
+          _BNItem(icon: Icons.folder_outlined, active: Icons.folder,      label: 'Collections', i: 1, cur: index, onTap: onTap),
+          _BNItem(icon: Icons.history_outlined, active: Icons.history,    label: 'History',     i: 2, cur: index, onTap: onTap),
+          _BNItem(icon: Icons.auto_awesome_outlined, active: Icons.auto_awesome, label: 'AI',  i: 3, cur: index, onTap: onTap, col: _C.purple),
+          _BNItem(icon: Icons.settings_outlined, active: Icons.settings,  label: 'Settings',   i: 4, cur: index, onTap: onTap),
+        ],
+      ),
+    );
+  }
+}
+
+class _BNItem extends StatelessWidget {
+  final IconData icon, active;
+  final String label;
+  final int i, cur;
+  final ValueChanged<int> onTap;
+  final Color? col;
+  const _BNItem({
+    required this.icon,
+    required this.active,
+    required this.label,
+    required this.i,
+    required this.cur,
+    required this.onTap,
+    this.col,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final on = i == cur;
+    final c = on ? (col ?? _C.accent2) : (col ?? _C.muted);
+    return Expanded(
+      child: InkWell(
+        onTap: () => onTap(i),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(on ? active : icon, size: 20, color: c),
+            const SizedBox(height: 2),
+            Text(label,
+                style: TextStyle(
+                    fontFamily: 'Syne',
+                    fontSize: 9,
+                    fontWeight: on ? FontWeight.w700 : FontWeight.w400,
+                    color: c)),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1779,112 +2141,118 @@ class _KVEditorState extends State<_KVEditor> {
           border: Border.all(color: _C.border),
           borderRadius: BorderRadius.circular(8),
           color: _C.surface),
-      child: Column(children: [
-        // Header
-        Container(
-          decoration: const BoxDecoration(
-              color: _C.surface2,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
-              border: Border(bottom: BorderSide(color: _C.border))),
-          child: Row(children: [
-            const SizedBox(width: 36),
-            _kH('Key', 3),
-            _vDiv(),
-            _kH('Value', 3),
-            _vDiv(),
-            _kH('Description', 4),
-            const SizedBox(width: 32),
-          ]),
-        ),
-        // Rows
-        Expanded(
-            child: ListView.builder(
-          itemCount: _rows.length,
-          itemBuilder: (_, idx) {
-            final e = _rows[idx];
-            return AnimatedOpacity(
-              duration: const Duration(milliseconds: 180),
-              opacity: e.enabled ? 1.0 : 0.4,
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              decoration: const BoxDecoration(
+                  color: _C.surface2,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+                  border: Border(bottom: BorderSide(color: _C.border))),
+              child: Row(children: [
+                const SizedBox(width: 36),
+                _kH('Key', 3),
+                _vDiv(),
+                _kH('Value', 3),
+                _vDiv(),
+                _kH('Description', 4),
+                const SizedBox(width: 32),
+              ]),
+            ),
+            // Rows
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _rows.length,
+              itemBuilder: (_, idx) {
+                final e = _rows[idx];
+                return AnimatedOpacity(
+                  duration: const Duration(milliseconds: 180),
+                  opacity: e.enabled ? 1.0 : 0.4,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border(
+                            bottom: BorderSide(color: _C.border.withOpacity(0.4)))),
+                    child: Row(children: [
+                      SizedBox(
+                          width: 36,
+                          child: Center(
+                              child: Checkbox(
+                            value: e.enabled,
+                            activeColor: _C.accent,
+                            side: const BorderSide(color: _C.muted2),
+                            onChanged: (v) {
+                              setState(() => e.enabled = v!);
+                              _notify();
+                            },
+                            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ))),
+                      Expanded(
+                          flex: 3,
+                          child: _fld(
+                            e.key,
+                            'Key',
+                            (v) {
+                              e.key = v;
+                              _notify();
+                            },
+                          )),
+                      _vDiv(),
+                      Expanded(
+                          flex: 3,
+                          child: _fld(e.value, 'Value', (v) {
+                            e.value = v;
+                            _notify();
+                          })),
+                      _vDiv(),
+                      Expanded(
+                          flex: 4,
+                          child: _fld(e.description, 'Description', (v) {
+                            e.description = v;
+                            _notify();
+                          }, sec: true)),
+                      SizedBox(
+                          width: 32,
+                          child: IconButton(
+                            icon:
+                                const Icon(Icons.close, size: 12, color: _C.muted2),
+                            onPressed: () {
+                              setState(() => _rows.removeAt(idx));
+                              _notify();
+                            },
+                            padding: EdgeInsets.zero,
+                          )),
+                    ]),
+                  ),
+                );
+              },
+            ),
+            // Add row
+            InkWell(
+              onTap: () {
+                setState(() => _rows.add(_KVEntry()));
+                _notify();
+              },
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
               child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                        bottom: BorderSide(color: _C.border.withOpacity(0.4)))),
-                child: Row(children: [
-                  SizedBox(
-                      width: 36,
-                      child: Center(
-                          child: Checkbox(
-                        value: e.enabled,
-                        activeColor: _C.accent,
-                        side: const BorderSide(color: _C.muted2),
-                        onChanged: (v) {
-                          setState(() => e.enabled = v!);
-                          _notify();
-                        },
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ))),
-                  Expanded(
-                      flex: 3,
-                      child: _fld(
-                        e.key,
-                        'Key',
-                        (v) {
-                          e.key = v;
-                          _notify();
-                        },
-                      )),
-                  _vDiv(),
-                  Expanded(
-                      flex: 3,
-                      child: _fld(e.value, 'Value', (v) {
-                        e.value = v;
-                        _notify();
-                      })),
-                  _vDiv(),
-                  Expanded(
-                      flex: 4,
-                      child: _fld(e.description, 'Description', (v) {
-                        e.description = v;
-                        _notify();
-                      }, sec: true)),
-                  SizedBox(
-                      width: 32,
-                      child: IconButton(
-                        icon:
-                            const Icon(Icons.close, size: 12, color: _C.muted2),
-                        onPressed: () {
-                          setState(() => _rows.removeAt(idx));
-                          _notify();
-                        },
-                        padding: EdgeInsets.zero,
-                      )),
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                alignment: Alignment.center,
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  const Icon(Icons.add, size: 12, color: _C.accent),
+                  const SizedBox(width: 4),
+                  Text('Add Row',
+                      style: _T.mono.copyWith(
+                          color: _C.accent,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600)),
                 ]),
               ),
-            );
-          },
-        )),
-        // Add row
-        InkWell(
-          onTap: () {
-            setState(() => _rows.add(_KVEntry()));
-            _notify();
-          },
-          borderRadius: const BorderRadius.vertical(bottom: Radius.circular(8)),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            alignment: Alignment.center,
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              const Icon(Icons.add, size: 12, color: _C.accent),
-              const SizedBox(width: 4),
-              Text('Add Row',
-                  style: _T.mono.copyWith(
-                      color: _C.accent,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600)),
-            ]),
-          ),
+            ),
+          ],
         ),
-      ]),
+      ),
     );
   }
 
