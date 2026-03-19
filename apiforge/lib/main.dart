@@ -60,24 +60,29 @@ class AppRoot extends StatefulWidget {
 }
 
 class _AppRootState extends State<AppRoot> {
+  bool _isRestoring = true;
+
   @override
   void initState() {
     super.initState();
     // Restore token on startup
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthService>().restoreSession();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await context.read<AuthService>().restoreSession();
+      if (mounted) setState(() => _isRestoring = false);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_isRestoring) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF0F172A),
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Consumer<AuthService>(
       builder: (context, auth, _) {
-        if (auth.isLoading) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
         if (auth.isAuthenticated) {
           return const HomeScreen();
         }

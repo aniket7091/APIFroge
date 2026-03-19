@@ -65,12 +65,6 @@ class _AuthScreenState extends State<AuthScreen>
         backgroundColor: Colors.green,
       ),
     );
-
-    // 👉 Navigate to Home
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
   } else if (auth.error != null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -101,15 +95,6 @@ class _AuthScreenState extends State<AuthScreen>
         backgroundColor: Colors.green,
       ),
     );
-
-    // 👉 Navigate to Home (auto login feel)
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
-    );
-
-    // 👉 OR if you want login first, use this instead:
-    // _tabController.animateTo(0);
   } else if (auth.error != null) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

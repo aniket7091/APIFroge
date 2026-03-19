@@ -2,7 +2,9 @@ import 'package:dio/dio.dart';
 
 /// Singleton Dio instance configured to point at the APIForge backend.
 abstract class ApiClient {
-  static const String _baseUrl = String.fromEnvironment('API_URL', defaultValue: 'https://apiforge-backend-abtv.onrender.com/api');
+  // Local backend server running on port 8000. 
+  // Note: If using an Android Emulator, change 127.0.0.1 to 10.0.2.2
+  static const String _baseUrl = String.fromEnvironment('API_URL', defaultValue: 'http://127.0.0.1:8000/api');
 
   static final Dio _dio = Dio(BaseOptions(
     baseUrl: _baseUrl,
